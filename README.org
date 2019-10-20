@@ -1,0 +1,64 @@
+#+TITLE: ft232h-eeprom
+
+A simple EEPROM programmer for 28CXXX devices, based on the [[https://learn.adafruit.com/adafruit-ft232h-breakout/][Adafruit FT232H breakout]]. This has been hacked together to work with AT28C256 chips but could be adapted to similar devices. Based on heavily on the EEPROM programmer used in [[https://eater.net/][Ben Eater's 8-bit CPU project]].
+
+* Schematic
+#+BEGIN_SRC picture
+  __________                            __________
+  | ft232h |                            | 28c256 |
+  |        |                            |        |
+  |     d0 |----------------------------| d0     |
+  |     d1 |----------------------------| d1     |
+  |     d2 |----------------------------| d2     |
+  |     d3 |----------------------------| d3     |
+  |     d4 |----------------------------| d4     |
+  |     d5 |----------------------------| d5     |
+  |     d6 |----------------------------| d6     |
+  |     d7 |----------------------------| d7     |
+  |        |                            |        |
+  |     c0 |------+     ____________    |        |
+  |     c1 |----+ |     | 74hc595  |    |        |
+  |     c2 |--+ | |     |          |    |        |
+  |        |  | | +-----| srclk qa |    | a15    |       	       	     
+  |        |  | +-|-----| ser   qb |----| a14    |                     
+  |        |  +-|-|-----| rclk  qc |----| a13    |
+  |        |  | | |     |       qd |----| a12    |
+  |        |  | | |     |       qe |----| a11    |      
+  |        |  | | |     |       qf |----| a10    |
+  |        |  | | |     |       qg |----| a9     |
+  |        |  | | |     |       qh |----| a8     |
+  |        |  | | |     |          |    |        |
+  |        |  | | |     |       qh'|-+  |        |
+  |        |  | | |     |__________| |  |        |
+  |        |  | | |   +--------------+  |        |
+  |        |  | | |   | ____________    |        |
+  |        |  | | |   | | 74hc595  |    |        |
+  |        |  | | |   | |          |    |        |
+  |        |  | | +---|-| srclk qa |----| a7     |        
+  |        |  | +-----|-| rclk  qb |----| a6     |
+  |        |  +-------+-| ser   qc |----| a5     |
+  |        |            |       qd |----| a4     |
+  |        |            |       qe |----| a3     |
+  |        |            |       qf |----| a2     |
+  |        |            |       qg |----| a1     |
+  |        |            |       qh |----| a0     |
+  |        |            |__________|    |        |
+  |        |     			  |        |      	
+  |     c3 |----------------------------| /ce    |       
+  |     c4 |----------------------------| /oe    |              	
+  |     c5 |----------------------------| /we    |       
+  |________|                            |________|         
+#+END_SRC
+
+Pins d0-d7 on the FT232H drive the EEPROM data lines, while c0-c5 act as control pins. c0, c1, and c2 drive the shift registers to the device address. c3, c4, and c5 drive the various enable pins on the EEPROM.
+
+On the shift registers, the /srclr pin should be tied high.
+* Usage
+#+BEGIN_SRC bash :exports results :results output
+./ft232h-eeprom -h
+#+END_SRC
+
+#+RESULTS:
+: Usage ft232h-eeprom -r <file> -w <file>
+:     -r <file>: Read eeprom contents to file
+:     -w <file>: Write file contents to eeprom
